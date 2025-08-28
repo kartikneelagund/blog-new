@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getAllBlogs } from "../utils/api";
-import BlogCard from "../components/BlogCard";
+import { getAllBlogs } from "../../utils/api";
+import BlogCard from "../../components/BlogCard/BlogCard";
 import "./Blogs.css";
 
 export default function Blogs() {

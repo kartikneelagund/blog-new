@@ -9,7 +9,7 @@ import BlogForm from "./pages/BlogForm/BlogForm";
 import Admin from "./pages/Admin/Admin";
 import ProtectedRoute from "./components/ProtectedRouter/ProtectedRoute";
 import Footer from "./components/Footer/Footer";
-import Blogs from "./pages/Blogs";
+import Blogs from "./pages/Blogs/Blogs";
 
 export default function App() {
   return (
