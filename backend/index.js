@@ -24,3 +24,8 @@ console.log("JWT_SECRET:", process.env.JWT_SECRET ? "✅ Loaded" : "❌ Missing"
 mongoose.connect(process.env.MONGO_URI)
   .then(() => app.listen(5000, () => console.log("Server connected on port 5000")))
   .catch(err => console.log(err));
+
+    //get route
+  app.get("/",(req,res)=>{
+    return res.send("backend is running")
+  })
