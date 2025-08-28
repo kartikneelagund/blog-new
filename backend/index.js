@@ -25,10 +25,14 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => app.listen(5000, () => console.log("Server connected on port 5000")))
   .catch(err => console.log(err));
 
-// //frontend connection
-// app.get('/',(req,res)=>{
-//   res.redirect(process.env.FRONTEND_URL);
-// });
+
+
+const allowedOrigins = ["http://localhost:5173","https://blog-new-frontend-five.vercel.app/"];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 
  
   

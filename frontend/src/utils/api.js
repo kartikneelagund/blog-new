@@ -1,5 +1,9 @@
 import axios from "axios";
 
+// ==================================
+// Axios Setup
+// ==================================
+
 // ✅ Use env variable if available, otherwise fallback to localhost
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
@@ -14,9 +18,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ==========================
+// ==================================
 // Auth API
-// ==========================
+// ==================================
 
 // Login
 export const login = async (userData) => {
@@ -36,9 +40,9 @@ export const getUserProfile = async () => {
   return res.data;
 };
 
-// ==========================
-// Example for Blogs API
-// ==========================
+// ==================================
+// Blogs API
+// ==================================
 
 // Get all blogs
 export const getAllBlogs = async () => {
@@ -57,5 +61,28 @@ export const deleteBlog = async (id) => {
   const res = await api.delete(`/blogs/${id}`);
   return res.data;
 };
+
+// ==================================
+// Users API
+// ==================================
+
+// ✅ Axios version (recommended)
+export const getUsers = async () => {
+  const res = await api.get("/users");
+  return res.data;
+};
+
+// ⚠️ Fetch version (alternative)
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+export async function getUsersFetch() {
+  const res = await fetch(`${API_URL}/users`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.json();
+}
 
 export default api;
