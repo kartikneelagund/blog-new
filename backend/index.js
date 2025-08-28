@@ -25,10 +25,10 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => app.listen(5000, () => console.log("Server connected on port 5000")))
   .catch(err => console.log(err));
 
-//frontend connection
-app.get('/',(req,res)=>{
-  res.redirect(process.env.FRONTEND_URL);
-});
+// //frontend connection
+// app.get('/',(req,res)=>{
+//   res.redirect(process.env.FRONTEND_URL);
+// });
 
  
   
