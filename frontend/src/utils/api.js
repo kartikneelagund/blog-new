@@ -73,7 +73,7 @@ export const getUsers = async () => {
 };
 
 // ⚠️ Fetch version (alternative)
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_BASE_URL || "https://blog-new-bakend.vercel.app/api";
 
 export async function getUsersFetch() {
   const res = await fetch(`${API_URL}/users`, {
