@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import { likeBlog, commentBlog } from "../utils/api";
 import "./BlogCard.css";
 
 export default function BlogCard({ blog }) {
@@ -9,8 +9,7 @@ export default function BlogCard({ blog }) {
   const [views, setViews] = useState(blog.views?.length || 0);
   const [likedByUser, setLikedByUser] = useState(false);
 
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId"); // store this at login
+  const userId = localStorage.getItem("userId"); // store at login
 
   // Check if current user liked the blog
   useEffect(() => {
@@ -28,14 +27,9 @@ export default function BlogCard({ blog }) {
 
   const handleLike = async () => {
     try {
-      const res = await axios.post(
-        `/api/blogs/${blog._id}/like`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setLikes(res.data.likesCount);
-      setLikedByUser(res.data.likes.includes(userId));
+      const res = await likeBlog(blog._id);
+      setLikes(res.likesCount);
+      setLikedByUser(res.likes.includes(userId));
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
@@ -46,13 +40,8 @@ export default function BlogCard({ blog }) {
     if (!text) return;
 
     try {
-      const res = await axios.post(
-        `/api/blogs/${blog._id}/comment`,
-        { text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setComments(res.data.commentsCount);
+      const res = await commentBlog(blog._id, text);
+      setComments(res.commentsCount);
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
