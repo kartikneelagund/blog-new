@@ -6,8 +6,7 @@ import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
 import userRoutes from './routes/user.js';
-import authRoutes from "./routes/auth.js";
-import blogRoutes from "./routes/blog.js";
+
 
 dotenv.config(); // 👈 must come before process.env usage
 
