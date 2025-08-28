@@ -10,10 +10,8 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
 
-  // Handle input changes
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Handle form submit
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -21,29 +19,25 @@ export default function Login() {
     try {
       const res = await api.post("/auth/login", form);
 
-      const { token, isAdmin } = res.data;
+      // Expect backend to return: { token, _id, username, email, isAdmin }
+      const { token, _id, username, email, isAdmin } = res.data || {};
 
       if (!token) {
         setError("Login failed: token missing from server response");
         return;
       }
 
-      // Save token in context and localStorage
-      login(token);
-      localStorage.setItem("token", token);
+      // Save token + user data (keeps axios header in sync)
+      login(token, { _id, username, email, isAdmin: !!isAdmin });
 
-      // Redirect based on role
-      if (isAdmin) {
-        navigate("/admin"); // admin dashboard
-      } else {
-        navigate("/profile"); // regular user profile
-      }
+      // Always send both admin & user to /profile
+      navigate("/profile", { replace: true });
     } catch (err) {
       console.error("❌ Login failed:", err.response?.data || err.message);
       setError(
         err?.response?.data?.message ||
-        err?.response?.data ||
-        "Login failed, please try again"
+          err?.response?.data ||
+          "Login failed, please try again"
       );
     }
   };
