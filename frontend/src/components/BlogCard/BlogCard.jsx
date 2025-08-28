@@ -1,41 +1,52 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import api, { likeBlog, commentBlog, deleteBlog } from "../../utils/api";
 import "./BlogCard.css";
 
-export default function BlogCard({ blog }) {
-  const [likes, setLikes] = useState(blog.likes?.length || 0);
-  const [comments, setComments] = useState(blog.comments?.length || 0);
-  const [views, setViews] = useState(blog.views?.length || 0);
+export default function BlogCard({ blog, currentUser }) {
+  const [likes, setLikes] = useState(blog.likes?.length ?? 0);
+  const [comments, setComments] = useState(blog.comments?.length ?? 0);
+  const [views, setViews] = useState(blog.views?.length ?? 0);
   const [likedByUser, setLikedByUser] = useState(false);
+  const hasViewed = useRef(false); // ✅ prevent duplicate view count
 
-  const token = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId"); // store this at login
+  const userId = currentUser?._id;
 
-  // Check if current user liked the blog
+  // check if already liked
   useEffect(() => {
     if (blog.likes && userId) {
       setLikedByUser(blog.likes.includes(userId));
     }
   }, [blog.likes, userId]);
 
-  // Update counts when blog changes
+  // sync counts when blog changes
   useEffect(() => {
-    setLikes(blog.likes?.length || 0);
-    setComments(blog.comments?.length || 0);
-    setViews(blog.views?.length || 0);
+    setLikes(blog.likes?.length ?? 0);
+    setComments(blog.comments?.length ?? 0);
+    setViews(blog.views?.length ?? 0);
   }, [blog]);
+
+  // increment views only once
+  useEffect(() => {
+    if (hasViewed.current) return;
+    hasViewed.current = true;
+
+    const addView = async () => {
+      try {
+        await api.post(`/blogs/${blog._id}/view`);
+        setViews((prev) => prev + 1);
+      } catch (err) {
+        console.error("Error incrementing view:", err.response?.data || err.message);
+      }
+    };
+    addView();
+  }, [blog._id]);
 
   const handleLike = async () => {
     try {
-      const res = await axios.post(
-        `/api/blogs/${blog._id}/like`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      setLikes(res.data.likesCount);
-      setLikedByUser(res.data.likes.includes(userId));
+      const res = await likeBlog(blog._id);
+      setLikes(res.likesCount);
+      setLikedByUser(res.likes.includes(userId));
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
@@ -44,15 +55,19 @@ export default function BlogCard({ blog }) {
   const handleComment = async () => {
     const text = prompt("Enter your comment:");
     if (!text) return;
-
     try {
-      const res = await axios.post(
-        `/api/blogs/${blog._id}/comment`,
-        { text },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await commentBlog(blog._id, text);
+      setComments(res.commentsCount);
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+    }
+  };
 
-      setComments(res.data.commentsCount);
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      await deleteBlog(blog._id);
+      window.location.reload();
     } catch (err) {
       console.error(err.response?.data || err.message);
     }
@@ -77,14 +92,18 @@ export default function BlogCard({ blog }) {
       />
 
       <div className="blog-footer">
-        <button
-          onClick={handleLike}
-          style={{ color: likedByUser ? "red" : "black" }}
-        >
+        <button style={{ color: likedByUser ? "red" : "black" }} onClick={handleLike}>
           ❤️ {likes}
         </button>
         <button onClick={handleComment}>💬 {comments}</button>
         <span>👀 {views}</span>
+
+        {(currentUser?.isAdmin || currentUser?._id === blog.author?._id) && (
+          <div className="blog-actions">
+            <Link to={`/edit/${blog._id}`} className="edit-btn">✏️ Edit</Link>
+            <button onClick={handleDelete} className="delete-btn">🗑️ Delete</button>
+          </div>
+        )}
       </div>
 
       <Link className="read-more" to={`/blogs/${blog._id}`}>
