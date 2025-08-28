@@ -6,6 +6,8 @@ import cors from 'cors';
 import authRoutes from './routes/auth.js';
 import blogRoutes from './routes/blog.js';
 import userRoutes from './routes/user.js';
+import authRoutes from "./routes/auth.js";
+import blogRoutes from "./routes/blog.js";
 
 dotenv.config(); // 👈 must come before process.env usage
 
@@ -34,7 +36,9 @@ app.use(cors({
   credentials: true,
 }));
 
- 
+// Routes
+app.use("/api/auth", authRoutes);       // auth routes
+app.use("/api/blogs", blogRoutes);     // ✅ add blog routes here
   
     //get route
   app.get("/",(req,res)=>{
