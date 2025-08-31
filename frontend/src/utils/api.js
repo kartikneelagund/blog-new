@@ -1,8 +1,8 @@
 import axios from "axios";
 
 
-// Debug your API URL
-console.log("API URL", import.meta.env.VITE_API_URL);
+// ✅ Debug your API URL
+console.log("API URL 👉", import.meta.env.VITE_API_URL);
 
 // ==========================
 // Axios Instance
