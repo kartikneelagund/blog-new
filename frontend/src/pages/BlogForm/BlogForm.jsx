@@ -11,21 +11,13 @@ const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "your_pre
 export default function BlogForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    title: "",
-    content: "",
-    category: "",
-    tags: ""
-  });
-  const [image, setImage] = useState("");      // Holds new uploaded image URL
-  const [existingImage, setExistingImage] = useState(""); // Holds existing blog image
+  const [form, setForm] = useState({ title: "", content: "", category: "", tags: "" });
+  const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
 
-  // Fetch existing blog if editing
   useEffect(() => {
     if (!id) return;
     const fetchBlog = async () => {
@@ -38,10 +30,9 @@ export default function BlogForm() {
           category: b.category || "",
           tags: (b.tags || []).join(", "),
         });
-        setExistingImage(b.image || "");
+        setImage(b.image || "");
       } catch (err) {
         console.error("Error fetching blog:", err.response?.data || err.message);
-        setError("Failed to fetch blog data.");
       }
     };
     fetchBlog();
@@ -49,7 +40,6 @@ export default function BlogForm() {
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // Upload new image to Cloudinary
   const uploadImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -58,7 +48,6 @@ export default function BlogForm() {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("upload_preset", UPLOAD_PRESET);
-
       const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
       const res = await fetch(url, { method: "POST", body: fd });
       const data = await res.json();
@@ -78,35 +67,30 @@ export default function BlogForm() {
       return;
     }
 
+    const payload = {
+      title: form.title,
+      content: form.content,
+      category: form.category,
+      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      image,
+    };
+
     setLoading(true);
     setError("");
 
     try {
-      // Build payload
-      const payload = {
-        title: form.title,
-        content: form.content,
-        category: form.category,
-        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-      };
-      
-      // Include image only if new one uploaded
-      if (image) payload.image = image;
-
       if (id) {
-        // PUT request to update blog
+        // PUT request with token
         await api.put(`/blogs/${id}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        // POST request to create new blog
-        if (image) payload.image = image; // optional for new blog
+        // POST request with token
         await api.post("/blogs", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-
-      navigate("/"); // redirect after success
+      navigate("/"); // Redirect to home after success
     } catch (err) {
       console.error("Blog submit error:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Failed to submit blog");
@@ -153,14 +137,7 @@ export default function BlogForm() {
         <input type="file" accept="image/*" onChange={uploadImage} />
       </label>
 
-      {/* Show preview: new uploaded or existing */}
-      {(image || existingImage) && (
-        <img
-          className="preview"
-          src={image || existingImage}
-          alt="preview"
-        />
-      )}
+      {image && <img className="preview" src={image} alt="preview" />}
 
       <button type="submit" disabled={loading}>
         {id ? "Update" : "Post"}
